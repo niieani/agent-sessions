@@ -16,4 +16,4 @@
 
 ## Privacy
 
-Treat repository content and GitHub text as public. Use synthetic examples; exclude private information and real user data from code, fixtures and docs. Review diffs and outgoing artifacts before committing or publishing. Keep private investigation evidence outside version control.
+Treat repository content and GitHub text as public. Use synthetic examples; exclude private information and real user data from code, fixtures and docs. Review diffs and outgoing artifacts before committing or publishing. Keep private investigation evidence outside version control. Real Archive excerpts handed over to reproduce a bug go under `temp.local/` (gitignored) and never leave it; reproduce them as synthetic fixtures before committing.
