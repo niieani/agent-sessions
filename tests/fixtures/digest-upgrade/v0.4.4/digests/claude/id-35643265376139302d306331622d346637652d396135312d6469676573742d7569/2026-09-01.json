@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "source": "claude",
+  "nativeId": "5d2e7a90-0c1b-4f7e-9a51-digest-ui",
+  "workday": "2026-09-01",
+  "covered": {
+    "firstIdx": 2,
+    "lastIdx": 4
+  },
+  "dialogFingerprint": "94dafa4edb5f0fcae8f98607604e14ad6b887284d3e224a6ae94ce37329be887",
+  "topic": null,
+  "title": "Fixture Topic 0 - Continued day 1",
+  "lockedTitle": "Fixture Topic 0 - Continued day 1",
+  "intent": "Intent 0",
+  "tldr": "Short 1",
+  "summary": "Summary 1.",
+  "classification": [
+    "build"
+  ],
+  "truncated": false,
+  "model": "fixture",
+  "promptVersion": 4,
+  "promptSource": "builtin",
+  "digestedAtMs": 1788998400000
+}

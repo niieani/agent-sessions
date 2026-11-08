@@ -1,0 +1,149 @@
+[
+  {
+    "provenance": {
+      "source": "codex",
+      "host": "studio",
+      "native_id": "019a2f3c-mail-optout",
+      "native_path": "/store/codex/019a2f3c-mail-optout.jsonl"
+    },
+    "title": null,
+    "project_path": "/work/household",
+    "native_project": null,
+    "created_at_ms": 1787911200000,
+    "updated_at_ms": 1787997900000,
+    "messages": [
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "Catalog the photographed junk mail and opt us out",
+        "timestamp_ms": 1787911200000,
+        "actions_before": 0
+      },
+      {
+        "role": "assistant",
+        "kind": "dialog",
+        "text": "Cataloged 40 senders.",
+        "timestamp_ms": 1787911260000,
+        "actions_before": 3
+      },
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "Proceed",
+        "timestamp_ms": 1787911320000,
+        "actions_before": 0
+      },
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "continue with the forms",
+        "timestamp_ms": 1787997600000,
+        "actions_before": 0
+      },
+      {
+        "role": "assistant",
+        "kind": "dialog",
+        "text": "Submitted 38 opt-out forms; two need a phone call.",
+        "timestamp_ms": 1787997900000,
+        "actions_before": 12
+      }
+    ],
+    "branches": [],
+    "subagent_parent": null,
+    "inherited_context": null,
+    "subagent_references": [],
+    "subagent_links": [],
+    "trailing_actions": 0
+  },
+  {
+    "provenance": {
+      "source": "codex",
+      "host": "studio",
+      "native_id": "019a3001-ci-cache",
+      "native_path": "/store/codex/019a3001-ci-cache.jsonl"
+    },
+    "title": null,
+    "project_path": "/work/asessions",
+    "native_project": null,
+    "created_at_ms": 1788102000000,
+    "updated_at_ms": 1788103200000,
+    "messages": [
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "Why does CI rebuild every dependency?",
+        "timestamp_ms": 1788102000000,
+        "actions_before": 0
+      },
+      {
+        "role": "assistant",
+        "kind": "dialog",
+        "text": "The cache key includes the commit hash; keyed it on Cargo.lock instead.",
+        "timestamp_ms": 1788103200000,
+        "actions_before": 7
+      }
+    ],
+    "branches": [],
+    "subagent_parent": null,
+    "inherited_context": null,
+    "subagent_references": [],
+    "subagent_links": [],
+    "trailing_actions": 0
+  },
+  {
+    "provenance": {
+      "source": "claude",
+      "host": "studio",
+      "native_id": "5d2e7a90-0c1b-4f7e-9a51-digest-ui",
+      "native_path": "/store/claude/5d2e7a90-0c1b-4f7e-9a51-digest-ui.jsonl"
+    },
+    "title": null,
+    "project_path": "/work/asessions",
+    "native_project": null,
+    "created_at_ms": 1788166800000,
+    "updated_at_ms": 1788254100000,
+    "messages": [
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "Sketch a status view for long digest runs",
+        "timestamp_ms": 1788166800000,
+        "actions_before": 0
+      },
+      {
+        "role": "assistant",
+        "kind": "dialog",
+        "text": "Proposed a progress file plus a status subcommand.",
+        "timestamp_ms": 1788168600000,
+        "actions_before": 4
+      },
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "Implement it",
+        "timestamp_ms": 1788249600000,
+        "actions_before": 0
+      },
+      {
+        "role": "assistant",
+        "kind": "dialog",
+        "text": "Implemented digest status with liveness checks.",
+        "timestamp_ms": 1788253800000,
+        "actions_before": 21
+      },
+      {
+        "role": "user",
+        "kind": "dialog",
+        "text": "ship it",
+        "timestamp_ms": 1788254100000,
+        "actions_before": 0
+      }
+    ],
+    "branches": [],
+    "subagent_parent": null,
+    "inherited_context": null,
+    "subagent_references": [],
+    "subagent_links": [],
+    "trailing_actions": 0
+  }
+]

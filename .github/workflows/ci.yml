@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push supersedes in-flight runs for the same pull request or branch. Every
+# commit on main gets its own group: main is the only place macOS is checked, and a
+# shared group would cancel or drop queued main runs, leaving commits unverified.
+concurrency:
+  group: ci-${{ github.ref == 'refs/heads/main' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        # macOS minutes bill at 10x Linux. Pull requests check Linux only; pushes to
+        # main and manual runs also check macOS, and releases build both targets.
+        include: >-
+          ${{ fromJSON(github.event_name == 'pull_request'
+          && '[{"runner":"ubuntu-24.04","target":"x86_64-unknown-linux-musl"}]'
+          || '[{"runner":"macos-15","target":"aarch64-apple-darwin"},{"runner":"ubuntu-24.04","target":"x86_64-unknown-linux-musl"}]') }}
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
+      # Full debug info for ~80 test binaries exhausts the hosted runner disk.
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+      CC_x86_64_unknown_linux_musl: musl-gcc
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install musl compiler
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install pinned Rust
+        # rustup reads the version, components, and targets from rust-toolchain.toml.
+        run: rustup toolchain install
+      # Caches dependency artifacts only: workspace crates (the test binaries) and
+      # incremental state are pruned before saving, so the cache does not add the
+      # test binaries' disk footprint. The key is shared with release.yml per target.
+      # Only main saves, so pull requests reuse main's cache without filling quota.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: ${{ matrix.target }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets --target '${{ matrix.target }}' -- -D warnings
+      - run: cargo test --locked --target '${{ matrix.target }}'
+      - name: Verify static Linux release binary
+        if: runner.os == 'Linux'
+        run: |
+          cargo build --locked --release --target '${{ matrix.target }}'
+          binary='target/${{ matrix.target }}/release/agent-sessions'
+          file "$binary"
+          program_headers=$(readelf -l "$binary")
+          dynamic_section=$(readelf -d "$binary")
+          if grep -q INTERP <<< "$program_headers"; then
+            echo 'Unexpected dynamic interpreter' >&2
+            exit 1
+          fi
+          if grep -q NEEDED <<< "$dynamic_section"; then
+            echo 'Unexpected shared library dependency' >&2
+            exit 1
+          fi

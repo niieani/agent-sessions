@@ -1,0 +1,68 @@
+---
+{% if session.requested_by %}session-requested-by: {{ ("[[" ~ session.requested_by.stem ~ "]]" ) | yaml }}
+{% endif %}{% if session.led_by and session.led_by.origin is defined and session.led_by.origin.kind == "t3" and session.led_by.origin.machine is defined and session.led_by.origin.t3ThreadId is defined %}session-t3-thread: {{ (session.led_by.origin.machine ~ ":" ~ session.led_by.origin.t3ThreadId) | yaml }}
+{% endif %}id: {{ session.native_id | yaml }}
+{% if branch is defined %}segment-id: {{ branch.id | yaml }}
+shared-segment: {{ branch.shared | yaml }}
+{% if branch.continues %}continues: {{ branch.continues.path | yaml }}
+up: {{ branch.continues.path | yaml }}
+{% endif %}{% endif %}source: {{ session.source | yaml }}
+{% if session.recovered_via %}session-recovered-via:
+  source: {{ session.recovered_via.source | yaml }}
+  thread-id: {{ session.recovered_via.thread_id | yaml }}
+  host: {{ session.recovered_via.host | yaml }}
+{% endif %}host: {{ session.host | yaml }}
+{% if session.project.name %}project: {{ session.project.name | yaml }}
+{% else %}project: null
+{% endif %}projectPath: {{ session.project.path | default("") | yaml }}
+{% if session.project.unresolved and not session.project.name %}repositoryUnresolved: true
+{% endif %}{% if session.native_title %}title: {{ session.native_title | yaml }}
+{% endif %}createdAt: {{ session.created_at }}
+updatedAt: {{ session.updated_at }}
+messageCount: {{ session.message_count }}
+{% if session.activity_days %}activityDays:
+{% for value in session.activity_days %}  - {{ value | yaml }}
+{% endfor %}{% endif %}{% if session.starting_model %}startingModel: {{ session.starting_model | yaml }}
+{% endif %}{% if session.starting_reasoning_effort %}startingReasoningEffort: {{ session.starting_reasoning_effort | yaml }}
+{% endif %}{% if session.git.branch or session.git.commit or session.git.repository_url %}git:
+{% if session.git.branch %}  branch: {{ session.git.branch | yaml }}
+{% endif %}{% if session.git.commit %}  commit: {{ session.git.commit | yaml }}
+{% endif %}{% if session.git.repository_url %}  repositoryUrl: {{ session.git.repository_url | yaml }}
+{% endif %}{% endif %}{% if session.patched_files %}patchedFiles:
+{% for value in session.patched_files %}  - {{ value | yaml }}
+{% endfor %}{% endif %}{% if session.referenced_files %}referencedFiles:
+{% for value in session.referenced_files %}  - {{ value | yaml }}
+{% endfor %}{% endif %}{% if session.subagent %}subagent: true
+parentId: {{ session.subagent.parent_id | yaml }}
+{% if session.subagent.name %}subagentName: {{ session.subagent.name | yaml }}
+{% endif %}{% if session.subagent.agent_type %}subagentType: {{ session.subagent.agent_type | yaml }}
+{% endif %}{% if session.subagent.depth is not none %}subagentDepth: {{ session.subagent.depth }}
+{% endif %}{% endif %}{% if session.inherited_context %}context:
+  mode: inherited
+  sourceId: {{ session.inherited_context.source_id | yaml }}
+  copiedItemCount: {{ session.inherited_context.copied_item_count }}
+{% endif %}{% if session.orchestrators %}orchestrators:
+{% for item in session.orchestrators %}  - source: {{ item.source | yaml_native }}
+    threadId: {{ item.thread_id | yaml_native }}
+    host: {{ item.host | yaml_native }}
+{% if item.title %}    title: {{ item.title | yaml_native }}
+{% endif %}{% if item.project_id %}    projectId: {{ item.project_id | yaml_native }}
+{% endif %}{% if item.project_title %}    project: {{ item.project_title | yaml_native }}
+{% endif %}{% if item.workspace_root %}    workspaceRoot: {{ item.workspace_root | yaml_native }}
+{% endif %}{% if item.provider_name %}    provider: {{ item.provider_name | yaml_native }}
+{% endif %}{% if item.provider_instance_id %}    providerInstance: {{ item.provider_instance_id | yaml_native }}
+{% endif %}{% if item.model %}    model: {{ item.model | yaml_native }}
+{% endif %}{% if item.runtime_mode %}    runtimeMode: {{ item.runtime_mode | yaml_native }}
+{% endif %}{% if item.interaction_mode %}    interactionMode: {{ item.interaction_mode | yaml_native }}
+{% endif %}{% if item.branch %}    branch: {{ item.branch | yaml_native }}
+{% endif %}{% if item.worktree %}    worktree: {{ item.worktree | yaml_native }}
+{% endif %}{% if item.linked_pull_request %}    linkedPullRequest: {{ item.linked_pull_request | yaml_native }}
+{% endif %}{% if item.created_at_ms is not none %}    createdAt: {{ item.created_at_ms | frontmatter_time }}
+{% endif %}{% if item.updated_at_ms is not none %}    updatedAt: {{ item.updated_at_ms | frontmatter_time }}
+{% endif %}    archived: {% if item.archived %}true{% else %}false{% endif %}
+    pinned: {% if item.pinned %}true{% else %}false{% endif %}
+    settled: {% if item.settled %}true{% else %}false{% endif %}
+    turnCount: {{ item.turn_count }}
+    checkpointCount: {{ item.checkpoint_count }}
+{% endfor %}{% endif %}---
+{{ body -}}

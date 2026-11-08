@@ -1,0 +1,7 @@
+{"type":"session","id":"0193aaaa-1111-7bbb-8ccc-2222dddd3333","timestamp":"2026-01-05T09:00:00.000Z","cwd":"/workspace/dev/myapp"}
+{"type":"message","timestamp":"2026-01-05T09:00:01.000Z","message":{"role":"user","content":"Ship it"}}
+{"type":"message","timestamp":"2026-01-05T09:00:05.000Z","message":{"role":"assistant","content":[{"type":"text","text":"Tagged v1.2.0 and pushed."}],"stopReason":"end_turn"}}
+{"type":"message","timestamp":"2026-01-05T09:00:06.000Z","message":{"role":"hookMessage","customType":"lint","content":"injected hook context"}}
+{"type":"message","timestamp":"2026-01-05T09:00:07.000Z","message":{"role":"bashExecution","command":"git status","output":"clean","exitCode":0}}
+{"type":"session_info","name":"Old name"}
+{"type":"session_info","name":""}

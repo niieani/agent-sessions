@@ -1,0 +1,3 @@
+# Session identity is (Source, native id); Host is provenance, not identity
+
+A Session is identified by its Source and native session id alone. When the same native session arrives from two hosts (possible when session directories are synced between machines via dotfile tooling), the records merge — richest capture wins, and every contributing host is recorded in provenance. We chose this over host-scoped identity because native ids are UUIDs (cross-host collisions are effectively impossible) and because host-scoped identity would silently duplicate synced sessions, which is the worse failure: duplicates corrupt the archive's answer to "what conversations did I have", while a merge of a true UUID collision is astronomically unlikely.

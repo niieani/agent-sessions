@@ -1,0 +1,95 @@
+{
+  "body": "\n<user>\n\nquestion\n\n</user>\n\n<assistant>\n\nanswer\n\n</assistant>\n",
+  "day": {
+    "created_at": "2026-08-31T10:00:00Z",
+    "digest": {
+      "classification": [
+        "build",
+        "test"
+      ],
+      "intent": "Keep render data stable",
+      "locked_title": "JSON Views - Stable context",
+      "model": "fixture",
+      "summary": "Stable render data.",
+      "title": "JSON Views - Stable context",
+      "tldr": "One line",
+      "truncated": false
+    },
+    "first": {
+      "path": "2026-08-31%20JSON%20Views%20-%20Stable%20context.md",
+      "stem": "2026-08-31 JSON Views - Stable context",
+      "title": "JSON Views - Stable context",
+      "workday": "2026-08-31"
+    },
+    "first_idx": 0,
+    "index": 1,
+    "last_idx": 1,
+    "message_count": 2,
+    "next": null,
+    "ongoing": false,
+    "previous": null,
+    "workday": "2026-08-31"
+  },
+  "messages": [
+    {
+      "idx": 0,
+      "kind": "dialog",
+      "role": "user",
+      "text": "question",
+      "timestamp": "2026-08-31T10:00:00Z",
+      "workday": "2026-08-31"
+    },
+    {
+      "idx": 1,
+      "kind": "dialog",
+      "role": "assistant",
+      "text": "answer",
+      "timestamp": "2026-08-31T10:01:00Z",
+      "workday": "2026-08-31"
+    }
+  ],
+  "session": {
+    "activity_days": [
+      "2026-08-31"
+    ],
+    "capture_host": "raw-host",
+    "copy_hosts": [],
+    "created_at": "2026-08-31T10:00:00Z",
+    "git": {
+      "branch": null,
+      "commit": null,
+      "repository_url": null
+    },
+    "host": "",
+    "host_attribution": null,
+    "host_name": "",
+    "host_name_safe": "",
+    "id": 1,
+    "inherited_context": null,
+    "led_by": null,
+    "message_count": 2,
+    "native_id": "json-unit",
+    "native_title": "Native json-unit",
+    "orchestrators": [],
+    "patched_files": [],
+    "project": {
+      "dir": "raw-project",
+      "name": "raw-project",
+      "name_safe": "raw-project",
+      "path": "/work/raw-project",
+      "unresolved": false
+    },
+    "recovered_via": null,
+    "referenced_files": [],
+    "requested_by": null,
+    "session_title": null,
+    "source": "codex",
+    "source_name": "codex",
+    "source_name_safe": "codex",
+    "starting_model": null,
+    "starting_reasoning_effort": null,
+    "subagent": null,
+    "topic": null,
+    "updated_at": "2026-08-31T10:01:00Z"
+  }
+}

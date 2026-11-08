@@ -1,0 +1,47 @@
+[package]
+name = "agent-sessions"
+version = "0.4.13"
+edition = "2024"
+description = "A durable, tool-independent archive of AI agent conversations"
+license = "MIT"
+
+[lib]
+name = "agent_sessions"
+path = "src/lib.rs"
+
+[[bin]]
+name = "agent-sessions"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+tokenizers = { version = "0.23.2", default-features = false, features = ["fancy-regex"] }
+base64 = "0.22"
+clap = { version = "4", features = ["derive"] }
+gethostname = "1"
+glob = "0.3"
+indexmap = { version = "2", features = ["serde"] }
+minijinja = { version = "3.0.0-alpha.0", features = ["json"] }
+quick-xml = { version = "0.42", features = ["serialize"] }
+regex = "1"
+rusqlite = { version = "0.37", features = ["bundled", "functions"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["raw_value", "arbitrary_precision"] }
+sha2 = "0.10"
+tar = "0.4"
+tempfile = "3"
+thiserror = "2"
+time = { version = "0.3", features = ["formatting", "parsing", "macros", "large-dates"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+toml = { version = "0.8", features = ["preserve_order"] }
+ureq = { version = "3.4", features = ["json"] }
+zstd = "0.13"
+time-tz = { version = "2.0.0", features = ["system"] }
+unicode-normalization = "0.1.25"
+tungstenite = { version = "0.30", features = ["rustls-tls-webpki-roots"] }
+pulldown-cmark = { version = "0.13.4", default-features = false }
+process-wrap = { version = "10.0.1", default-features = false, features = ["std", "process-group"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+rustix = { version = "1.1.5", features = ["fs"] }

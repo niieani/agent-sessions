@@ -1,0 +1,3 @@
+# ChatGPT aggregates native evidence across contributing Hosts
+
+ChatGPT pages are partial observations of a remotely owned Session. Selecting a single machine’s Capture drops branches and can discard newer native revisions. The Adapter therefore reconstructs one native graph from all contributing Captures, ordered by exact native decimal revision before observation time; extraction, status and Render share this graph. Every contributing Host projection is refreshed together, leaving ordinary Host election responsible for Provenance rather than evidence coverage. Captures remain independently preserved, and Host-run Sources retain their existing election semantics.

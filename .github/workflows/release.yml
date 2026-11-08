@@ -1,0 +1,140 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: aarch64-apple-darwin
+          - runner: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_TERM_COLOR: always
+      CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
+      # Full debug info for ~80 test binaries exhausts the hosted runner disk.
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+      CC_x86_64_unknown_linux_musl: musl-gcc
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install musl compiler
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Install pinned Rust
+        # rustup reads the version, components, and targets from rust-toolchain.toml.
+        run: rustup toolchain install
+      # Restores the dependency cache that CI saves on main for the same target;
+      # one-off tag runs never save their own.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          shared-key: ${{ matrix.target }}
+          save-if: false
+      - name: Check tag against Cargo version
+        run: |
+          version=$(cargo metadata --locked --no-deps --format-version 1 | jq -er '.packages[] | select(.name == "agent-sessions") | .version')
+          test "$GITHUB_REF_NAME" = "v$version"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets --target '${{ matrix.target }}' -- -D warnings
+      - run: cargo test --locked --target '${{ matrix.target }}'
+      - run: cargo build --locked --release --target '${{ matrix.target }}'
+      - name: Verify binary version
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          "target/$TARGET/release/agent-sessions" --version | grep -q "^agent-sessions $RELEASE_VERSION ("
+      - name: Verify static Linux linkage
+        if: runner.os == 'Linux'
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          binary="target/$TARGET/release/agent-sessions"
+          file "$binary"
+          program_headers=$(readelf -l "$binary")
+          dynamic_section=$(readelf -d "$binary")
+          if grep -q INTERP <<< "$program_headers"; then
+            echo 'Unexpected dynamic interpreter' >&2
+            exit 1
+          fi
+          if grep -q NEEDED <<< "$dynamic_section"; then
+            echo 'Unexpected shared library dependency' >&2
+            exit 1
+          fi
+      - name: Package
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          mkdir -p dist
+          tar -C "target/$TARGET/release" -czf "dist/agent-sessions-$RELEASE_VERSION-$TARGET.tar.gz" agent-sessions
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.target }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  attest:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      # This job never checks out or executes repository code or release binaries.
+      # Private-repository attestations require Enterprise Cloud; skip until public.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        if: github.event.repository.private == false
+        with:
+          subject-path: dist/*.tar.gz
+          create-storage-record: false
+
+  publish:
+    needs: [build, attest]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: Checksums and release
+        working-directory: dist
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          test -f "agent-sessions-${TAG#v}-aarch64-apple-darwin.tar.gz"
+          test -f "agent-sessions-${TAG#v}-x86_64-unknown-linux-musl.tar.gz"
+          sha256sum -- *.tar.gz > SHA256SUMS
+          sha256sum -c SHA256SUMS
+          gh release create "$TAG" --verify-tag --generate-notes --title "$TAG" -- *.tar.gz SHA256SUMS

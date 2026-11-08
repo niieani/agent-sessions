@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "source": "codex",
+  "nativeId": "019a3001-ci-cache",
+  "workday": "2026-08-30",
+  "covered": {
+    "firstIdx": 0,
+    "lastIdx": 1
+  },
+  "topic": "Fixture Topic 6",
+  "title": "Fixture Topic 6 - Opened day 6",
+  "lockedTitle": "Fixture Topic 6 - Opened day 6",
+  "intent": "Intent 6",
+  "tldr": null,
+  "summary": "Summary 6.",
+  "classification": [
+    "ops"
+  ],
+  "truncated": false,
+  "model": "fixture",
+  "promptVersion": 4,
+  "promptSource": "builtin",
+  "digestedAtMs": 1788998400000
+}

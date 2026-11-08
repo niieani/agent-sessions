@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "source": "codex",
+  "nativeId": "019a2f3c-mail-optout",
+  "workday": "2026-08-29",
+  "covered": {
+    "firstIdx": 3,
+    "lastIdx": 4
+  },
+  "dialogFingerprint": "77fc342f27b494093522b1bb1fd1a9688836efe5c6c2f91986dbd243213721b3",
+  "topic": null,
+  "title": "Fixture Topic 3 - Continued day 4",
+  "lockedTitle": "Fixture Topic 3 - Continued day 4",
+  "intent": "Intent 3",
+  "tldr": "Short 4",
+  "summary": "Summary 4.",
+  "classification": [
+    "build"
+  ],
+  "truncated": false,
+  "model": "fixture",
+  "promptVersion": 4,
+  "promptSource": "builtin",
+  "digestedAtMs": 1788998400000
+}

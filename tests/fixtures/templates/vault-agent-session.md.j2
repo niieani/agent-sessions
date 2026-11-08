@@ -1,0 +1,108 @@
+---
+{% if session.requested_by %}session-requested-by: {{ ("[[" ~ session.requested_by.stem ~ "]]" ) | yaml }}
+{% endif %}{% if session.led_by and session.led_by.origin is defined and session.led_by.origin.kind == "t3" and session.led_by.origin.machine is defined and session.led_by.origin.t3ThreadId is defined %}session-t3-thread: {{ (session.led_by.origin.machine ~ ":" ~ session.led_by.origin.t3ThreadId) | yaml }}
+{% endif %}{% if session.subagent %}
+authorship: agent
+{% else %}
+tags:
+  - transcript
+authorship: user
+{% endif %}
+authors:
+{% if not session.subagent %}
+  - {{ "[[the operator]]" | yaml }}
+{% endif %}
+  - {{ ("[[" ~ session.source_name_safe ~ "]]" ) | yaml }}
+update-policy: generated
+created: {{ day.created_at | yaml }}
+session-id: {{ (session.source ~ ":" ~ session.native_id) | yaml }}
+session-source: {{ session.source | yaml }}
+session-host: {{ ("[[" ~ session.host_name_safe ~ "]]" ) | yaml }}
+session-day: {{ day.workday | yaml }}
+session-day-index: {{ day.index }}
+{% if session.session_title %}
+session-title: {{ session.session_title | yaml }}
+{% endif %}
+{% if session.subagent %}
+session-subagent: true
+session-parent-id: {{ (session.subagent.parent_source ~ ":" ~ session.subagent.parent_id) | yaml }}
+{% if session.subagent.name %}
+session-subagent-name: {{ session.subagent.name | yaml }}
+{% endif %}
+{% if session.subagent.agent_type %}
+session-subagent-type: {{ session.subagent.agent_type | yaml }}
+{% endif %}
+{% if session.subagent.depth is not none %}
+session-subagent-depth: {{ session.subagent.depth }}
+{% endif %}
+{% if session.subagent.parent_day %}
+up: {{ ("[[" ~ session.subagent.parent_day.stem ~ "]]" ) | yaml }}
+{% endif %}
+{% elif day.index > 1 and day.first %}
+up: {{ ("[[" ~ day.first.stem ~ "]]" ) | yaml }}
+{% endif %}
+{% if session.project.name %}
+session-project: {{ ("[[" ~ session.project.name_safe ~ "]]" ) | yaml }}
+{% endif %}
+{% if session.recovered_via %}
+session-recovered-via-source: {{ session.recovered_via.source | yaml }}
+session-recovered-via-thread: {{ session.recovered_via.thread_id | yaml }}
+session-recovered-via-host: {{ session.recovered_via.host | yaml }}
+{% endif %}
+session-message-count: {{ session.message_count }}
+{% if session.starting_model %}
+session-starting-model: {{ session.starting_model | yaml }}
+{% endif %}
+{% if session.starting_reasoning_effort %}
+session-starting-reasoning-effort: {{ session.starting_reasoning_effort | yaml }}
+{% endif %}
+{% if session.git.commit %}
+session-git-commit: {{ session.git.commit | yaml }}
+{% endif %}
+{% if session.git.repository_url %}
+session-git-repository-url: {{ session.git.repository_url | yaml }}
+{% endif %}
+{% if session.git.branch %}
+session-git-branch: {{ session.git.branch | yaml }}
+{% endif %}
+{% if session.patched_files %}
+session-patched-files:
+{% for f in session.patched_files %}
+  - {{ f | yaml }}
+{% endfor %}
+{% endif %}
+{% if session.referenced_files %}
+session-referenced-files:
+{% for f in session.referenced_files %}
+  - {{ f | yaml }}
+{% endfor %}
+{% endif %}
+{% if day.ongoing %}
+session-ongoing: true
+{% endif %}
+{% if day.digest %}
+classification:
+{% for c in day.digest.classification %}
+  - {{ c | yaml }}
+{% endfor %}
+{% endif %}
+---
+{% if day.digest %}
+> [!INFO] AI-derived
+{% if day.digest.intent %}
+> **Intent:** {{ day.digest.intent | replace("\n", " ") }}
+>
+{% endif %}
+{% if day.digest.tldr %}
+> **TL;DR:** {{ day.digest.tldr | replace("\n", "\n> ") }}
+>
+{% endif %}
+> {{ day.digest.summary | replace("\n", "\n> ") }}
+{% endif %}
+{% if day.previous or day.next %}
+{% if day.digest %}
+
+{% endif %}
+{% if day.previous %}Previous: [[{{ day.previous.stem }}]]{% endif %}{% if day.previous and day.next %} · {% endif %}{% if day.next %}Next: [[{{ day.next.stem }}]]{% endif +%}
+{% endif %}
+{{ body -}}

@@ -1,0 +1,6 @@
+# {{ title }}
+
+| Date | Title | Transcript |
+| --- | --- | --- |
+{% for entry in entries %}| {{ entry.date }} | {{ entry.title | default("") | table_cell }} | [{{ entry.filename }}]({{ entry.path }}) |
+{% endfor %}

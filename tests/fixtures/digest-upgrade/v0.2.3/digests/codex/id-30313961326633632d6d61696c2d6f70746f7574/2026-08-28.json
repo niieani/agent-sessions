@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "source": "codex",
+  "nativeId": "019a2f3c-mail-optout",
+  "workday": "2026-08-28",
+  "covered": {
+    "firstIdx": 0,
+    "lastIdx": 2
+  },
+  "topic": "Fixture Topic 3",
+  "title": "Fixture Topic 3 - Opened day 3",
+  "lockedTitle": "Fixture Topic 3 - Opened day 3",
+  "intent": "Intent 3",
+  "tldr": null,
+  "summary": "Summary 3.",
+  "classification": [
+    "ops"
+  ],
+  "truncated": false,
+  "model": "fixture",
+  "promptVersion": 4,
+  "promptSource": "builtin",
+  "digestedAtMs": 1788998400000
+}

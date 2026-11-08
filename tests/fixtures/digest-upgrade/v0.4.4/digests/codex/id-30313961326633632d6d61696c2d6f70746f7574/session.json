@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "topic": "Fixture Topic 3",
+  "title": "Fixture Session",
+  "updatedAtMs": 1788998400000,
+  "model": "fixture",
+  "promptVersion": 4,
+  "promptSource": "builtin",
+  "pushed": {}
+}

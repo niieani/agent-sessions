@@ -1,0 +1,5 @@
+INSERT INTO "orchestration_v2_projection_messages" VALUES('u','t',NULL,NULL,'user',0,'2026-10-05T00:00:00Z','2026-10-05T00:00:00Z','{"text": "Actual prompt", "attachments": []}');
+INSERT INTO "orchestration_v2_projection_messages" VALUES('a','t',NULL,NULL,'assistant',0,'2026-10-05T00:00:00Z','2026-10-05T00:00:00Z','{"text": "An actual answer.\n\n```rs\nlet ok = true;\n```", "attachments": []}');
+INSERT INTO "orchestration_v2_projection_provider_threads" VALUES('pt','t',NULL,'codex',NULL,'idle',NULL,NULL,'2026-10-05T00:00:00Z','{"nativeThreadRef": {"driver": "codex", "nativeId": "0199b700-0000-7000-8000-000000000001", "strength": "strong"}}',NULL,NULL);
+INSERT INTO "orchestration_v2_projection_threads" VALUES('t','p','Current','codex','full-access','default','pt','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z',NULL,NULL,'{"id": "t", "branch": "work", "modelSelection": {"model": "gpt-test"}}',NULL);
+INSERT INTO "projection_projects" VALUES('p','Project','/work','[]','2026-10-05T00:00:00Z','2026-10-05T00:00:00Z',NULL,NULL,NULL,NULL,0,NULL);

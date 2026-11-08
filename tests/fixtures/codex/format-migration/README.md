@@ -1,0 +1,1 @@
+Synthetic Codex records for Dialog-coverage settlement. The archived form repeats injected instructions; the rewritten form removes that context and adds ordinals while retaining the same Dialog and time span. All identities, text and tool records are invented. The opaque payload is a placeholder, not encrypted session evidence.

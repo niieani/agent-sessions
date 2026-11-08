@@ -1,0 +1,12 @@
+[views]
+timezone = "UTC"
+unit = "session-day"
+
+[digest]
+tokenizer = 'tests/fixtures/tokenizer'
+base-url = "http://127.0.0.1:1/v1"
+model = "fixture"
+api-key-env = "DIGEST_UPGRADE_UNUSED_KEY"
+concurrency = 1
+max-input-tokens = 60000
+request-timeout = "1s"

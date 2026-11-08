@@ -1,0 +1,4 @@
+{"timestamp":"2026-03-01T08:00:00.000Z","type":"session_meta","payload":{"id":"dddddddd-dddd-7ddd-8ddd-dddddddddddd","timestamp":"2026-03-01T08:00:00.000Z","cwd":"/workspace/Projects/api","originator":"codex_cli_rs","cli_version":"0.90.0","source":"cli","thread_source":"user","model_provider":"openai","instructions":null}}
+{"timestamp":"2026-03-01T08:00:01.000Z","type":"response_item","payload":{"type":"message","role":"user","content":"What does the retry middleware do?"}}
+{"timestamp":"2026-03-01T08:00:05.000Z","type":"event_msg","payload":{"type":"agent_message","message":"It retries idempotent requests up to 3 times with exponential backoff."}}
+{"timestamp":"2026-03-01T08:00:06.000Z","type":"event_msg","payload":{"type":"task_complete","last_agent_message":"It retries idempotent requests up to 3 times with exponential backoff."}}
