@@ -74,7 +74,7 @@ Both build jobs must succeed before publishing one GitHub Release with:
 - `agent-sessions-<version>-x86_64-unknown-linux-musl.tar.gz`
 - `SHA256SUMS` (SHA-256 of both archives, filenames relative to the download directory)
 
-Before public release, each archive must contain `agent-sessions`, `LICENSE` and `THIRD_PARTY_NOTICES.md` at its root. Verify the downloaded archive contents; source-only notices are insufficient for binary distribution. Public
+Each archive contains the `agent-sessions` binary at its root. Public
 builds use `actions/attest` in a separate job that only downloads and attests
 archives; tests and build scripts run without OIDC or attestation write access.
 Publication waits for this job to succeed. Private builds skip attestation issuance

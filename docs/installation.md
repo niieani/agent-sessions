@@ -70,7 +70,7 @@ gh release download "$release_tag" --repo niieani/agent-sessions \
 "$HOME/.local/bin/agent-sessions" --version
 ```
 
-Keep the release's `LICENSE` and `THIRD_PARTY_NOTICES.md` with any redistributed binaries. Where a public release has an attestation, verify the archive before extraction:
+Where a public release has an attestation, verify the archive before extraction:
 
 ```sh
 gh attestation verify "$download_dir/$asset" --repo niieani/agent-sessions
