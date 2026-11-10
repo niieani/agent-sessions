@@ -224,6 +224,10 @@ _Avoid_: rejected response, failure (the run's count), error (the message)
 The live record of the latest digest or repair-digests run in `digest-status.json`: its planned items (Session Days and Session titles) by Source, how many have settled or failed, the item in flight, and an ETA from the recent rate. A run still marked running whose process no longer holds the status lock is stale.
 _Avoid_: progress file, heartbeat, run log
 
+**Capacity Wait**:
+The pause a Digest run enters when the model server answers HTTP 507 because it cannot load the model. All workers stop sending; one request is retried per interval until capacity returns or the wait runs out, which ends the run with the remaining items left for the next run rather than failed.
+_Avoid_: backoff (per-item), outage, retry (a Rejected Digest's correction)
+
 **Redo**:
 Model work that regenerates an existing Digest — a Session Day Digest whose covered range or Dialog Fingerprint no longer matches (or is forced), or an existing Session title refreshed after its Session Days change. Opposed to **new** work, which creates a Digest that did not exist. A dry-run counts both, and many redone Session Days after an upgrade mean the release is invalidating existing Digests.
 _Avoid_: re-digest (as a count), stale (a Session Day's state, not the work), migration

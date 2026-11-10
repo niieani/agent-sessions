@@ -168,6 +168,13 @@ pub struct DigestConfig {
     pub request_timeout: String,
     #[serde(default = "default_digest_retries")]
     pub retries: usize,
+    /// While the model server answers 507 (Insufficient Storage), how long to
+    /// pause between single retry requests.
+    #[serde(default = "default_capacity_retry_interval")]
+    pub capacity_retry_interval: String,
+    /// How long to keep retrying after the first 507 before ending the pass.
+    #[serde(default = "default_capacity_max_wait")]
+    pub capacity_max_wait: String,
     /// How often a running Digest logs its progress line and refreshes
     /// `digest-status.json` even when no work settled.
     #[serde(default = "default_progress_interval")]
@@ -199,6 +206,14 @@ fn default_request_timeout() -> String {
 
 fn default_digest_retries() -> usize {
     2
+}
+
+fn default_capacity_retry_interval() -> String {
+    "5m".into()
+}
+
+fn default_capacity_max_wait() -> String {
+    "75m".into()
 }
 
 fn default_progress_interval() -> String {
@@ -277,6 +292,23 @@ impl DigestConfig {
         Ok(interval)
     }
 
+    pub fn capacity_retry_interval(&self) -> Result<std::time::Duration> {
+        let interval = parse_duration(&self.capacity_retry_interval).with_context(
+            || "digest.capacity-retry-interval must be an integer followed by ms, s, m, h, or d",
+        )?;
+        anyhow::ensure!(
+            !interval.is_zero(),
+            "digest.capacity-retry-interval must be greater than zero"
+        );
+        Ok(interval)
+    }
+
+    pub fn capacity_max_wait(&self) -> Result<std::time::Duration> {
+        parse_duration(&self.capacity_max_wait).with_context(
+            || "digest.capacity-max-wait must be an integer followed by ms, s, m, h, or d",
+        )
+    }
+
     fn validate(&self) -> Result<()> {
         if self.base_url.trim().is_empty()
             || !(self.base_url.starts_with("http://") || self.base_url.starts_with("https://"))
@@ -312,6 +344,8 @@ impl DigestConfig {
         }
         self.timeout()?;
         self.progress_interval()?;
+        self.capacity_retry_interval()?;
+        self.capacity_max_wait()?;
         for reserved in ["model", "messages", "response_format"] {
             if self.extra_body.contains_key(reserved) {
                 bail!("digest.extra-body must not override {reserved}");

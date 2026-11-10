@@ -25,6 +25,18 @@ Token counting includes the chat template, generation prefix and configured `cha
 
 The default `tokenizer-prompt-format = "chat-template"` counts ordinary template input. For oMLX without grammar decoding, `"omlx"` also counts its appended JSON-schema instruction. Choose the format matching the server; unknown values fail configuration parsing.
 
+### Model capacity (HTTP 507)
+
+A local server that cannot load the model for lack of memory answers HTTP 507 (Insufficient Storage). That is a server-wide state, so the run enters a Capacity Wait instead of failing each item: it stops sending, retries the same request once per `capacity-retry-interval`, and resumes normally once the server accepts it. If capacity has not returned after `capacity-max-wait`, the run ends with one message such as `digest model unavailable: insufficient memory for 75 minutes; 12 items left for next run` and a nonzero exit. The remaining items are not marked failed; the next run picks them up.
+
+```toml
+[digest]
+capacity-retry-interval = "5m"   # default
+capacity-max-wait = "75m"        # default; "0s" ends the run at the first 507
+```
+
+Other HTTP errors fail only the affected Session, as before; `retries` applies to rejected model output, not to HTTP errors.
+
 ## Plan, generate and render
 
 ```sh

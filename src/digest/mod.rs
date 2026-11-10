@@ -1,5 +1,6 @@
 mod backfill;
 mod cache;
+mod capacity;
 mod client;
 mod files;
 mod fingerprint;
@@ -22,7 +23,11 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::sync::Mutex;
 
 use anyhow::{Context, Result};
-pub use client::{CompletionKind, HttpModelClient, ModelClient, ModelCorrection, ModelRequest};
+pub use capacity::{CapacitySleep, ThreadSleep};
+pub use client::{
+    CapacityUnavailable, CompletionKind, HttpModelClient, ModelClient, ModelCorrection,
+    ModelRequest,
+};
 pub use files::{
     CoveredRange, DayDigest, PromptSource, SessionDigest, digest_dir, path_digest_dir, read_day,
 };
@@ -143,6 +148,16 @@ pub fn run_with_client(
     client: &dyn ModelClient,
     options: &DigestOptions,
 ) -> Result<DigestStats> {
+    run_with_client_and_sleep(archive, client, options, &ThreadSleep)
+}
+
+/// [`run_with_client`] with an injectable pause for the 507 capacity wait.
+pub fn run_with_client_and_sleep(
+    archive: &Archive,
+    client: &dyn ModelClient,
+    options: &DigestOptions,
+    sleep: &dyn CapacitySleep,
+) -> Result<DigestStats> {
     let _writer_lock = if options.dry_run {
         None
     } else {
@@ -180,8 +195,14 @@ pub fn run_with_client(
     } else {
         Progress::begin(archive.root(), "digest", config.progress_interval()?)?
     };
+    let client = capacity::GatedClient::new(
+        client,
+        sleep,
+        config.capacity_retry_interval()?,
+        config.capacity_max_wait()?,
+    );
     let result = digest_planned(
-        archive, client, config, &fleet, &workday, options, &progress,
+        archive, &client, config, &fleet, &workday, options, &progress,
     );
     progress.finish(&result)?;
     result
@@ -189,7 +210,7 @@ pub fn run_with_client(
 
 fn digest_planned(
     archive: &Archive,
-    client: &dyn ModelClient,
+    client: &capacity::GatedClient<'_>,
     config: &DigestConfig,
     fleet: &FleetConfig,
     workday: &WorkdayConfig,
@@ -232,17 +253,22 @@ fn digest_planned(
     let worker_count = config.concurrency.min(plans.len().max(1));
     let queue = Mutex::new(VecDeque::from(plans));
     let totals = Mutex::new(DigestStats::default());
+    let left = std::sync::atomic::AtomicUsize::new(0);
     progress.while_running(|| {
         std::thread::scope(|scope| {
             for _ in 0..worker_count {
                 scope.spawn(|| {
                     let mut local = DigestStats::default();
                     loop {
+                        if client.exhausted() {
+                            break;
+                        }
                         let Some(plan) = queue.lock().expect("Digest queue poisoned").pop_front()
                         else {
                             break;
                         };
-                        process_session(&worker, plan, &mut local);
+                        let unfinished = process_session(&worker, plan, &mut local);
+                        left.fetch_add(unfinished, std::sync::atomic::Ordering::Relaxed);
                     }
                     support::merge_stats(
                         &mut totals.lock().expect("Digest totals poisoned"),
@@ -253,6 +279,23 @@ fn digest_planned(
         })
     });
     let mut stats = totals.into_inner().expect("Digest totals poisoned");
+    stats.requests += client.extra_requests();
+    if client.exhausted() {
+        if !options.dry_run {
+            refresh_cache(archive)?;
+        }
+        let left = left.into_inner()
+            + queue
+                .into_inner()
+                .expect("Digest queue poisoned")
+                .iter()
+                .map(process::planned_items)
+                .sum::<usize>();
+        let minutes = client.max_wait().as_secs().div_ceil(60);
+        anyhow::bail!(
+            "digest model unavailable: insufficient memory for {minutes} minutes; {left} items left for next run"
+        );
+    }
     stats.fingerprints_backfilled = backfills.len();
     plan_summary.record_tokens(&stats.input_tokens_by_source);
     stats.plan = plan_summary;
