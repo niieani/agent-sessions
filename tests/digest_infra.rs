@@ -80,6 +80,8 @@ fn http_client_sends_strict_schema_and_extra_body() {
             max_input_tokens: 1000,
             request_timeout: "1s".into(),
             retries: 2,
+            capacity_retry_interval: "5m".into(),
+            capacity_max_wait: "75m".into(),
             progress_interval: "5m".into(),
             prompts: Default::default(),
             extra_body: extra,

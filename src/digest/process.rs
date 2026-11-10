@@ -12,9 +12,29 @@ pub(super) struct Worker<'a> {
     pub progress: &'a Progress,
 }
 
-pub(super) fn process_session(worker: &Worker<'_>, plan: SessionPlan, stats: &mut DigestStats) {
+/// Planned Digest items of a Session: its stale Days plus its title.
+pub(super) fn planned_items(plan: &SessionPlan) -> usize {
+    let days = plan.days.iter().filter(|day| day.stale).count();
+    days + usize::from(days > 0 || plan.refresh_session)
+}
+
+/// Digest one Session; returns how many of its items were left unprocessed
+/// because the model capacity wait ran out.
+pub(super) fn process_session(
+    worker: &Worker<'_>,
+    plan: SessionPlan,
+    stats: &mut DigestStats,
+) -> usize {
     stats.candidates += plan.days.iter().filter(|day| day.stale).count();
+    let written = stats.day_written + stats.session_written;
     let result = process_session_inner(worker, &plan, stats);
+    if let Err(error) = &result
+        && super::capacity::is_exhausted(error)
+    {
+        // Not an item failure: the run ends and the next one picks it up.
+        let done = stats.day_written + stats.session_written - written;
+        return planned_items(&plan).saturating_sub(done);
+    }
     worker.progress.session_finished(
         &plan.session.source,
         &plan.session.native_id,
@@ -29,6 +49,7 @@ pub(super) fn process_session(worker: &Worker<'_>, plan: SessionPlan, stats: &mu
             "Digest failed; continuing"
         );
     }
+    0
 }
 
 pub(super) fn process_session_inner(

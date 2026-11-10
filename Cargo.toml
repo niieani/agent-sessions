@@ -1,6 +1,6 @@
 [package]
 name = "agent-sessions"
-version = "0.4.13"
+version = "0.4.14"
 edition = "2024"
 description = "A durable, tool-independent archive of AI agent conversations"
 license = "MIT"

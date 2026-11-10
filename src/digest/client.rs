@@ -79,6 +79,44 @@ impl std::fmt::Display for InvalidCompletion {
 }
 impl std::error::Error for InvalidCompletion {}
 
+/// HTTP 507 (Insufficient Storage): the server cannot load the model now. This
+/// is a server-wide capacity state, not a problem with one request.
+#[derive(Debug)]
+pub struct CapacityUnavailable {
+    /// The server's explanation, e.g. its memory ceiling.
+    pub detail: String,
+}
+
+impl std::fmt::Display for CapacityUnavailable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Digest model capacity unavailable (HTTP 507)")?;
+        if !self.detail.is_empty() {
+            write!(f, ": {}", self.detail)?;
+        }
+        Ok(())
+    }
+}
+impl std::error::Error for CapacityUnavailable {}
+
+const INSUFFICIENT_STORAGE: u16 = 507;
+
+/// The server's explanation from an error body: OpenAI-style
+/// `error.message`, else the text itself, bounded for logs.
+fn error_detail(body: &str) -> String {
+    let detail = serde_json::from_str::<Value>(body)
+        .ok()
+        .and_then(|value| {
+            value
+                .pointer("/error/message")
+                .or_else(|| value.pointer("/message"))
+                .or_else(|| value.pointer("/detail"))
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| body.trim().to_owned());
+    detail.chars().take(500).collect()
+}
+
 pub struct HttpModelClient {
     agent: ureq::Agent,
     endpoint: String,
@@ -92,6 +130,7 @@ impl HttpModelClient {
         let timeout: Duration = config.timeout()?;
         let agent: ureq::Agent = ureq::Agent::config_builder()
             .timeout_global(Some(timeout))
+            .http_status_as_error(false)
             .build()
             .into();
         let extra_body = serde_json::to_value(&config.extra_body)?
@@ -121,6 +160,18 @@ impl ModelClient for HttpModelClient {
             .header("Authorization", &format!("Bearer {}", self.api_key))
             .send_json(Value::Object(body))
             .context("Digest model request failed")?;
+        let status = response.status().as_u16();
+        if status == INSUFFICIENT_STORAGE {
+            let body = response.body_mut().read_to_string().unwrap_or_default();
+            return Err(CapacityUnavailable {
+                detail: error_detail(&body),
+            }
+            .into());
+        }
+        if !response.status().is_success() {
+            return Err(anyhow::Error::new(ureq::Error::StatusCode(status))
+                .context("Digest model request failed"));
+        }
         let value: Value = response
             .body_mut()
             .read_json()
