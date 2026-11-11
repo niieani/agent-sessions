@@ -2,39 +2,9 @@
 use super::{Evidence, Graph};
 use anyhow::Result;
 use serde_json::Value;
-use std::collections::{BTreeMap, BTreeSet};
-
-/// Native message targets whose alternate Versions must be refreshed when a
-/// conversation changes, even when the fork is before the selected overlap.
-pub(super) fn known_version_ids(graph: &Graph) -> BTreeSet<String> {
-    let mut known = graph.versions.clone();
-    let mut siblings: BTreeMap<&str, Vec<String>> = BTreeMap::new();
-    for (id, node) in &graph.nodes {
-        let Some(message) = &node.message else {
-            continue;
-        };
-        if message
-            .pointer("/metadata/has_versions")
-            .and_then(Value::as_bool)
-            == Some(true)
-        {
-            known.insert(id.clone());
-        }
-        if super::graph::dialog_role(message).is_some()
-            && message["id"].as_str() == Some(id)
-            && let Some(parent) = node.parent.as_deref()
-        {
-            siblings.entry(parent).or_default().push(id.clone());
-        }
-    }
-    for ids in siblings.into_values().filter(|ids| ids.len() > 1) {
-        known.extend(ids);
-    }
-    known
-}
 
 pub(super) fn cover_from_exports(graph: &mut Graph, records: &[&Evidence]) -> Result<()> {
-    if graph.versions.is_empty() {
+    if graph.advertised_versions.is_empty() {
         return Ok(());
     }
     let detail_prefix = format!("https://chatgpt.com/backend-api/conversations/{}", graph.id);
@@ -67,7 +37,7 @@ pub(super) fn cover_from_exports(graph: &mut Graph, records: &[&Evidence]) -> Re
         if export.validate().is_err() {
             continue;
         }
-        for target in &graph.versions {
+        for target in &graph.advertised_versions {
             let Some(node) = export.nodes.get(target) else {
                 continue;
             };
@@ -101,22 +71,6 @@ pub(super) fn cover_from_exports(graph: &mut Graph, records: &[&Evidence]) -> Re
 mod tests {
     use super::*;
     use serde_json::json;
-    #[test]
-    fn version_frontier_includes_visible_export_siblings_and_advertised_nodes() {
-        let mut graph = Graph::default();
-        graph.id = "c".into();
-        graph.add_export(&json!({"id":"c","current_node":"b","mapping":{
-            "root":{"parent":null,"message":null},
-            "a":{"parent":"root","message":{"id":"a","author":{"role":"user"},"content":{"parts":["one"]}}},
-            "b":{"parent":"root","message":{"id":"b","author":{"role":"user"},"content":{"parts":["two"]}}},
-            "internal":{"parent":"root","message":{"id":"internal","author":{"role":"assistant"},"channel":"analysis","content":{"parts":["internal"]}}}
-        }}),0).unwrap();
-        graph.versions.insert("advertised".into());
-        assert_eq!(
-            known_version_ids(&graph).into_iter().collect::<Vec<_>>(),
-            ["a", "advertised", "b"]
-        );
-    }
     #[test]
     fn hidden_export_siblings_do_not_certify_alternate_versions() {
         let u = json!({"id":"u","author":{"role":"user"},"content":{"parts":["Prompt"]}});

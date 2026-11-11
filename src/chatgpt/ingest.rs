@@ -270,15 +270,18 @@ pub fn status(archive: &Archive) -> Result<Value> {
             .collect::<Vec<_>>();
         let complete = graph.validate().is_ok();
         let in_progress = graph.in_progress_message_ids();
+        // Advertised Versions not yet evidenced. Gates checkpoints and makes the
+        // collector re-collect; never a request-target list (the collector targets
+        // only nodes its own responses advertise).
         let missing_versions = graph
-            .versions
+            .advertised_versions
             .iter()
             .filter(|id| {
                 !graph.fetched_versions.contains(*id)
                     && !graph.export_covered_versions.contains(*id)
             })
             .collect::<Vec<_>>();
-        conversations.insert(graph.id.clone(),serde_json::json!({"updatedAt":revision.number,"messageIds":graph.nodes.keys().collect::<Vec<_>>(),"complete":complete,"missingVersions":missing_versions,"knownVersionIds":super::versions::known_version_ids(&graph),"exportCoveredVersionIds":graph.export_covered_versions,"inProgressMessageIds":in_progress,"checkpointEligible":complete && missing_versions.is_empty() && in_progress.is_empty(),"title":graph.title,"generatedAssetIds":generated,"generatedAssets":descriptors.values().collect::<Vec<_>>(),"savedGeneratedAssetIds":generated.intersection(&saved_assets).collect::<Vec<_>>(),"missingGeneratedAssetIds":missing,"mediaComplete":missing.is_empty()}));
+        conversations.insert(graph.id.clone(),serde_json::json!({"updatedAt":revision.number,"messageIds":graph.nodes.keys().collect::<Vec<_>>(),"complete":complete,"missingVersions":missing_versions,"exportCoveredVersionIds":graph.export_covered_versions,"inProgressMessageIds":in_progress,"checkpointEligible":complete && missing_versions.is_empty() && in_progress.is_empty(),"title":graph.title,"generatedAssetIds":generated,"generatedAssets":descriptors.values().collect::<Vec<_>>(),"savedGeneratedAssetIds":generated.intersection(&saved_assets).collect::<Vec<_>>(),"missingGeneratedAssetIds":missing,"mediaComplete":missing.is_empty()}));
     }
     for (id, entry) in &mut conversations {
         if let Some(Some(project)) = context.native_projects.get(id) {

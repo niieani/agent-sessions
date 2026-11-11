@@ -22,7 +22,7 @@ Regression coverage includes nested and empty/internal forks, cross-Workday cont
 
 Modified older Conversations return to recents and are included by listing revision; there is no recurring full-export dependency. Discovery stops at the export/last successful-run boundary with precision overlap. Website listing revisions and detail revisions remain distinct.
 
-Unchanged complete Conversations skip. A changed existing Conversation audits older selected pages for new version markers and refreshes known Version targets recursively. The website exposes markers per page, not a verified complete global fork inventory: a known selected Message alone cannot prove that a new older alternate fork is absent. Page bodies go directly to native files; shared prefixes remain deduplicated in Views.
+Unchanged complete Conversations skip. A changed existing Conversation audits older selected pages for new version markers and requests Versions recursively for Messages its own responses advertise with `has_versions`; archive-known fork siblings are never targets. The website exposes markers per page, not a verified complete global fork inventory: a known selected Message alone cannot prove that a new older alternate fork is absent. Page bodies go directly to native files; shared prefixes remain deduplicated in Views.
 
 Transcript progress requires complete discovery/collection, durable inputs, successful ingestion/rendering and a durable media retry queue. Missing image downloads never block an otherwise successful transcript Bookmark. Media-only retries preserve transcript progress and do not repaginate unchanged dialogue. The producer owns scheduling and queues; account/session credentials never enter this Archive. Authentication/source failures stay explicit.
 
@@ -42,7 +42,7 @@ agent-sessions chatgpt ingest-export-media --archive <staging>/archive --zip <st
 
 `ingest-export` includes that step; the separate command can process media without replaying conversation shards. Native companion files also preserve asset IDs, provenance, hashes, lengths and quality. Shared RenderAssets resolve saved media aliases to images and missing assets to native descriptor links, so generated links remain navigable. Confirmed originals outrank observed previews; a preview does not establish original-media completeness.
 
-Status exposes generated/saved/missing IDs, full generated asset descriptors, known Version targets, current streaming IDs, missing advertised Versions and transcript checkpoint eligibility. Same-ID Message content follows observation chronology; equal-time selected pages outrank older Versions. Historical intermediate progress does not block a finished current response. Exact same-revision export sibling proof can cover an advertised Version already preserved locally; missing/different numeric revisions cannot establish that proof.
+Status exposes generated/saved/missing IDs, full generated asset descriptors, current streaming IDs, missing advertised Versions and transcript checkpoint eligibility. Same-ID Message content follows observation chronology; equal-time selected pages outrank older Versions. Historical intermediate progress does not block a finished current response. Exact same-revision export sibling proof can cover an advertised Version already preserved locally; missing/different numeric revisions cannot establish that proof.
 
 ## Deployment acceptance
 

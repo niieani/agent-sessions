@@ -20,8 +20,11 @@ pub struct Graph {
     pub project: Option<String>,
     pub nodes: BTreeMap<String, Node>,
     pub issues: BTreeSet<String>,
-    pub versions: BTreeSet<String>,
+    /// Message IDs a captured response flagged `metadata.has_versions: true`.
+    pub advertised_versions: BTreeSet<String>,
+    /// Advertised IDs with a preserved Versions response.
     pub fetched_versions: BTreeSet<String>,
+    /// Advertised IDs whose alternates a same-revision export already proves.
     pub export_covered_versions: BTreeSet<String>,
     pub exported_media: BTreeMap<String, Value>,
     pub has_native_history: bool,
@@ -217,7 +220,7 @@ impl Graph {
                 .and_then(Value::as_bool)
                 == Some(true)
             {
-                self.versions.insert(id.clone());
+                self.advertised_versions.insert(id.clone());
             }
             // Browser responses omit internal graph nodes. Their ordered visible
             // sequence is authoritative; metadata.parent_id can name absent nodes.
